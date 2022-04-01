@@ -1,0 +1,45 @@
+version: "3.7"
+
+services:
+  db:
+    image: mariadb
+    container_name: tv-program-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: tv-program-db
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: password
+      TZ: "Asia/Tokyo"
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - tv-program-mysql-db:/var/lib/mysql
+      - ./docker/db/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./docker/db/sql:/docker-entrypoint-initdb.d
+    networks:
+      tv-program-net:
+        ipv4_address: 172.35.8.2
+
+  adminer:
+    image: adminer
+    container_name: tv-program-db-admin
+    environment:
+      TZ: "Asia/Tokyo"
+    restart: always
+    ports:
+      - 9090:8080
+    networks:
+      tv-program-net:
+        ipv4_address: 172.35.8.3
+
+volumes:
+  tv-program-mysql-db:
+    driver: local
+
+networks:
+  tv-program-net:
+    name: tv-program-net
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.35.8.0/24
