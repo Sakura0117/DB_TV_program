@@ -1,6 +1,25 @@
 version: "3.7"
 
 services:
+  api:
+    container_name: tv-program-api
+    build:
+      context: "./api/"
+      dockerfile: "Dockerfile"
+    volumes:
+      - ./api:/usr/src/app:delegated
+      - /usr/src/app/node_modules
+    ports:
+      - 9000:3000
+    environment:
+      TZ: "Asia/Tokyo"
+    entrypoint: ["dockerize", "--timeout", "20s", "--wait", "tcp://db:3306"]
+    command: sh -c "npm start"
+    restart: always
+    networks:
+      tv-program-net:
+        ipv4_address: 172.35.8.2
+
   db:
     image: mariadb
     container_name: tv-program-db
@@ -17,7 +36,7 @@ services:
       - ./docker/db/sql:/docker-entrypoint-initdb.d
     networks:
       tv-program-net:
-        ipv4_address: 172.35.8.2
+        ipv4_address: 172.35.8.3
 
   adminer:
     image: adminer
@@ -29,7 +48,7 @@ services:
       - 9090:8080
     networks:
       tv-program-net:
-        ipv4_address: 172.35.8.3
+        ipv4_address: 172.35.8.4
 
 volumes:
   tv-program-mysql-db:
